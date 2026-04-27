@@ -10,17 +10,7 @@ import { motion, AnimatePresence } from 'motion/react';
 interface TeacherSchedule {
   id: string;
   name: string;
-  periods: {
-    assembly: string;
-    rollCall: string;
-    p1: string;
-    p2: string;
-    p3: string;
-    p4: string;
-    p5: string;
-    p6: string;
-    p7: string;
-  };
+  periods: Record<string, string>;
 }
 
 export default function App() {
@@ -32,12 +22,12 @@ export default function App() {
   const [session, setSession] = useState('2026-2027');
 
   const [timings, setTimings] = useState([
-    { id: 'assembly', label: 'Morning Assembly', time: '10:00 - 10:30' },
-    { id: 'rollCall', label: 'Roll Call', time: '10:30 - 10:50' },
+    { id: 'assembly', label: 'Morning Assembly', time: '10:00 - 10:30', isSystem: true },
+    { id: 'rollCall', label: 'Roll Call', time: '10:30 - 10:50', isSystem: true },
     { id: 'p1', label: 'Period I', time: '10:50 - 11:20' },
     { id: 'p2', label: 'Period II', time: '11:20 - 11:50' },
     { id: 'p3', label: 'Period III', time: '11:50 - 12:20' },
-    { id: 'recess', label: 'Recess Period', time: '12:30 - 02:00' },
+    { id: 'recess', label: 'Recess Period', time: '12:30 - 02:00', isSystem: true },
     { id: 'p4', label: 'Period IV', time: '02:00 - 02:30' },
     { id: 'p5', label: 'Period V', time: '02:30 - 03:00' },
     { id: 'p6', label: 'Period VI', time: '03:00 - 03:30' },
@@ -136,24 +126,51 @@ export default function App() {
 
   const [isEditing, setIsEditing] = useState(false);
 
+  const addPeriod = (atIndex: number) => {
+    const newId = `p-${Math.random().toString(36).substr(2, 5)}`;
+    const newTiming = { id: newId, label: 'New Period', time: '00:00 - 00:00' };
+    
+    // Insert into timings
+    const newTimings = [...timings];
+    newTimings.splice(atIndex, 0, newTiming);
+    setTimings(newTimings);
+
+    // Add empty period to all teachers
+    setTeachers(teachers.map(t => ({
+      ...t,
+      periods: { ...t.periods, [newId]: '' }
+    })));
+  };
+
+  const removePeriod = (id: string) => {
+    setTimings(timings.filter(t => t.id !== id));
+    // Optionally clean up teacher records
+    setTeachers(teachers.map(t => {
+      const newPeriods = { ...t.periods };
+      delete newPeriods[id];
+      return { ...t, periods: newPeriods };
+    }));
+  };
+
+  const updateTimingLabel = (id: string, label: string) => {
+    setTimings(timings.map(t => t.id === id ? { ...t, label } : t));
+  };
+
   const addTeacher = () => {
     const newId = Math.random().toString(36).substr(2, 9);
+    const initialPeriods: Record<string, string> = {};
+    timings.forEach(t => {
+      if (t.id === 'assembly') initialPeriods[t.id] = 'Assembly';
+      else if (t.id === 'rollCall') initialPeriods[t.id] = 'Roll Call';
+      else initialPeriods[t.id] = '';
+    });
+
     setTeachers([
       ...teachers,
       {
         id: newId,
         name: `New Teacher ${teachers.length + 1}`,
-        periods: {
-          assembly: 'Assembly',
-          rollCall: 'Roll Call',
-          p1: '',
-          p2: '',
-          p3: '',
-          p4: '',
-          p5: '',
-          p6: '',
-          p7: '',
-        },
+        periods: initialPeriods,
       },
     ]);
   };
@@ -164,7 +181,7 @@ export default function App() {
 
   const updateTeacherPeriod = (
     teacherId: string,
-    period: keyof TeacherSchedule['periods'],
+    period: string,
     value: string
   ) => {
     setTeachers(
@@ -270,9 +287,16 @@ export default function App() {
               <thead className="bg-gray-200 print:bg-gray-200">
                 <tr>
                   <th className="border border-black p-2 w-42 font-bold uppercase tracking-wider">STAFF NAME</th>
-                  {timings.map((t) => (
-                    <th key={t.id} className={`border border-black p-1 text-center font-bold uppercase ${t.id === 'recess' ? 'w-20 bg-neutral-300 print:bg-neutral-300' : 'w-24'}`}>
-                      {t.label}<br />
+                  {timings.map((t, idx) => (
+                    <th key={t.id} className={`border border-black p-1 text-center font-bold uppercase relative group/header ${t.id === 'recess' ? 'w-20 bg-neutral-300 print:bg-neutral-300' : 'w-24'}`}>
+                      {isEditing && !t.isSystem ? (
+                        <input 
+                          value={t.label}
+                          onChange={(e) => updateTimingLabel(t.id, e.target.value)}
+                          className="w-full text-center bg-transparent border-none focus:outline-none focus:ring-1 focus:ring-neutral-400 rounded"
+                        />
+                      ) : t.label}
+                      <br />
                       <span className="font-normal text-[9px]">
                         {isEditing ? (
                           <input 
@@ -282,6 +306,38 @@ export default function App() {
                           />
                         ) : t.time}
                       </span>
+
+                      {/* Add Period Before */}
+                      {isEditing && (
+                        <>
+                          <button
+                            onClick={() => addPeriod(idx)}
+                            className="absolute -left-1 top-1/2 -translate-y-1/2 bg-neutral-800 text-white p-0.5 rounded-full opacity-0 group-hover/header:opacity-100 transition-opacity z-10 no-print"
+                            title="Add period before"
+                          >
+                            <Plus className="w-3 h-3" />
+                          </button>
+                          
+                          {idx === timings.length - 1 && (
+                            <button
+                              onClick={() => addPeriod(idx + 1)}
+                              className="absolute -right-1 top-1/2 -translate-y-1/2 bg-neutral-800 text-white p-0.5 rounded-full opacity-0 group-hover/header:opacity-100 transition-opacity z-10 no-print"
+                              title="Add period after"
+                            >
+                              <Plus className="w-3 h-3" />
+                            </button>
+                          )}
+
+                          {!t.isSystem && (
+                            <button
+                              onClick={() => removePeriod(t.id)}
+                              className="absolute -top-1 -right-1 bg-red-500 text-white p-0.5 rounded-full opacity-0 group-hover/header:opacity-100 transition-opacity z-10 no-print"
+                            >
+                              <Trash2 className="w-2.5 h-2.5" />
+                            </button>
+                          )}
+                        </>
+                      )}
                     </th>
                   ))}
                 </tr>
@@ -315,98 +371,39 @@ export default function App() {
                           teacher.name
                         )}
                       </td>
-                      {/* Assembly */}
-                      <td className="border border-black p-1 text-center text-[10px] italic bg-gray-50/50">
-                        <PeriodCell
-                          value={teacher.periods.assembly}
-                          onChange={(val) => updateTeacherPeriod(teacher.id, 'assembly', val)}
-                          isEditing={isEditing}
-                        />
-                      </td>
-                      {/* Roll Call */}
-                      <td className="border border-black p-1 text-center text-[10px] italic bg-gray-50/50">
-                        <PeriodCell
-                          value={teacher.periods.rollCall}
-                          onChange={(val) => updateTeacherPeriod(teacher.id, 'rollCall', val)}
-                          isEditing={isEditing}
-                        />
-                      </td>
-                      {/* P1 */}
-                      <td className="border border-black p-1 text-center">
-                        <PeriodCell
-                          value={teacher.periods.p1}
-                          onChange={(val) => updateTeacherPeriod(teacher.id, 'p1', val)}
-                          isEditing={isEditing}
-                        />
-                      </td>
-                      {/* P2 */}
-                      <td className="border border-black p-1 text-center">
-                        <PeriodCell
-                          value={teacher.periods.p2}
-                          onChange={(val) => updateTeacherPeriod(teacher.id, 'p2', val)}
-                          isEditing={isEditing}
-                        />
-                      </td>
-                      {/* P3 */}
-                      <td className="border border-black p-1 text-center">
-                        <PeriodCell
-                          value={teacher.periods.p3}
-                          onChange={(val) => updateTeacherPeriod(teacher.id, 'p3', val)}
-                          isEditing={isEditing}
-                        />
-                      </td>
-                      {/* Recess */}
-                      <td className="border border-black p-1 text-center font-bold text-[10px] bg-neutral-200 print:bg-neutral-200 italic">
-                        RECESS
-                      </td>
-                      {/* P4 */}
-                      <td className="border border-black p-1 text-center">
-                        <PeriodCell
-                          value={teacher.periods.p4}
-                          onChange={(val) => updateTeacherPeriod(teacher.id, 'p4', val)}
-                          isEditing={isEditing}
-                        />
-                      </td>
-                      {/* P5 */}
-                      <td className="border border-black p-1 text-center">
-                        <PeriodCell
-                          value={teacher.periods.p5}
-                          onChange={(val) => updateTeacherPeriod(teacher.id, 'p5', val)}
-                          isEditing={isEditing}
-                        />
-                      </td>
-                      {/* P6 */}
-                      <td className="border border-black p-1 text-center">
-                        <PeriodCell
-                          value={teacher.periods.p6}
-                          onChange={(val) => updateTeacherPeriod(teacher.id, 'p6', val)}
-                          isEditing={isEditing}
-                        />
-                      </td>
-                      {/* P7 */}
-                      <td className="border border-black p-1 text-center">
-                        <PeriodCell
-                          value={teacher.periods.p7}
-                          onChange={(val) => updateTeacherPeriod(teacher.id, 'p7', val)}
-                          isEditing={isEditing}
-                        />
-                      </td>
+                      {timings.map((t) => {
+                        if (t.id === 'recess') {
+                          return (
+                            <td key={t.id} className="border border-black p-1 text-center font-bold text-[10px] bg-neutral-200 print:bg-neutral-200 italic">
+                              RECESS
+                            </td>
+                          );
+                        }
+                        
+                        const isAssemblyOrRollCall = t.id === 'assembly' || t.id === 'rollCall';
+                        
+                        return (
+                          <td 
+                            key={t.id} 
+                            className={`border border-black p-1 text-center ${isAssemblyOrRollCall ? 'text-[10px] italic bg-gray-50/50' : ''}`}
+                          >
+                            <PeriodCell
+                              value={teacher.periods[t.id] || ''}
+                              onChange={(val) => updateTeacherPeriod(teacher.id, t.id, val)}
+                              isEditing={isEditing}
+                            />
+                          </td>
+                        );
+                      })}
                     </motion.tr>
                   ))}
                 </AnimatePresence>
                 {Array.from({ length: Math.max(0, 8 - teachers.length) }).map((_, i) => (
                   <tr key={`empty-${i}`} className="h-12">
                     <td className="border border-black"></td>
-                    <td className="border border-black"></td>
-                    <td className="border border-black"></td>
-                    <td className="border border-black"></td>
-                    <td className="border border-black"></td>
-                    <td className="border border-black"></td>
-                    <td className="border border-black"></td>
-                    <td className="border border-black"></td>
-                    <td className="border border-black"></td>
-                    <td className="border border-black"></td>
-                    <td className="border border-black"></td>
+                    {timings.map(t => (
+                      <td key={t.id} className={`border border-black ${t.id === 'recess' ? 'bg-neutral-200' : ''}`}></td>
+                    ))}
                   </tr>
                 ))}
               </tbody>
