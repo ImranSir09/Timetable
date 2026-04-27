@@ -1,20 +1,20 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# Academic Timetable Pro
 
-# Run and deploy your AI Studio app
+A professional, high-resolution academic timetable generator designed for government schools, optimized for A4 landscape printing.
 
-This contains everything you need to run your app locally.
+## Features
+- **Dynamic Timings**: Edit every period's time slot directly in the UI.
+- **Staff Management**: Add up to 12 staff members with specific class/subject assignments.
+- **Recess Period**: Dedicated recess block from 12:30 PM to 02:00 PM.
+- **A4 Landscape Optimized**: Perfect CSS print rules for sharp, professional staff-room notice board prints.
+- **Watermarked**: Official generation credits included.
 
-View your app in AI Studio: https://ai.studio/apps/d1203aa9-25ff-4d65-9bbe-46cc68dd8af9
+## GitHub Deployment
+This project is configured for **GitHub Pages**. 
+1. Push this code to a GitHub repository.
+2. Go to Repository **Settings** > **Pages**.
+3. Set the source to **GitHub Actions**.
+4. The included `.github/workflows/deploy.yml` will handle the rest.
 
-## Run Locally
-
-**Prerequisites:**  Node.js
-
-
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+## Developer
+Created by **Imran Gani Mugloo**

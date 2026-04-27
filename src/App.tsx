@@ -31,6 +31,19 @@ export default function App() {
   const [uDiseCode, setUDiseCode] = useState('01234567890');
   const [session, setSession] = useState('2026-2027');
 
+  const [timings, setTimings] = useState([
+    { id: 'assembly', label: 'Morning Assembly', time: '10:00 - 10:30' },
+    { id: 'rollCall', label: 'Roll Call', time: '10:30 - 10:50' },
+    { id: 'p1', label: 'Period I', time: '10:50 - 11:20' },
+    { id: 'p2', label: 'Period II', time: '11:20 - 11:50' },
+    { id: 'p3', label: 'Period III', time: '11:50 - 12:20' },
+    { id: 'recess', label: 'Recess Period', time: '12:30 - 02:00' },
+    { id: 'p4', label: 'Period IV', time: '02:00 - 02:30' },
+    { id: 'p5', label: 'Period V', time: '02:30 - 03:00' },
+    { id: 'p6', label: 'Period VI', time: '03:00 - 03:30' },
+    { id: 'p7', label: 'Period VII', time: '03:30 - 04:00' },
+  ]);
+
   const [teachers, setTeachers] = useState<TeacherSchedule[]>([
     {
       id: '1',
@@ -49,7 +62,7 @@ export default function App() {
     },
     {
       id: '2',
-      name: 'Jane Smith',
+      name: 'Staff Member 2',
       periods: {
         assembly: 'Assembly',
         rollCall: 'Roll Call',
@@ -63,6 +76,10 @@ export default function App() {
       },
     },
   ]);
+
+  const updateTiming = (id: string, newTime: string) => {
+    setTimings(timings.map(t => t.id === id ? { ...t, time: newTime } : t));
+  };
 
   const [isEditing, setIsEditing] = useState(false);
 
@@ -183,13 +200,13 @@ export default function App() {
             
             <div className="flex justify-between items-center mt-6 mb-4 text-sm font-medium border-b border-black pb-2 px-1">
               <div>District: <span className="font-bold">{isEditing ? (
-                <input value={district} onChange={(e) => setDistrict(e.target.value)} className="bg-neutral-50 rounded border border-neutral-300 px-1" />
+                <input value={district} onChange={(e) => setDistrict(e.target.value)} className="bg-neutral-100 rounded border border-neutral-300 px-1" />
               ) : district}</span></div>
               <div>Zone: <span className="font-bold">{isEditing ? (
-                <input value={zone} onChange={(e) => setZone(e.target.value)} className="bg-neutral-50 rounded border border-neutral-300 px-1" />
+                <input value={zone} onChange={(e) => setZone(e.target.value)} className="bg-neutral-100 rounded border border-neutral-300 px-1" />
               ) : zone}</span></div>
               <div>U-DISE Code: <span className="font-bold">{isEditing ? (
-                <input value={uDiseCode} onChange={(e) => setUDiseCode(e.target.value)} className="bg-neutral-50 rounded border border-neutral-300 px-1" />
+                <input value={uDiseCode} onChange={(e) => setUDiseCode(e.target.value)} className="bg-neutral-100 rounded border border-neutral-300 px-1" />
               ) : uDiseCode}</span></div>
             </div>
           </header>
@@ -199,26 +216,18 @@ export default function App() {
             <table className="w-full border-collapse border border-black text-[11px] table-fixed">
               <thead className="bg-gray-200 print:bg-gray-200">
                 <tr>
-                  <th className="border border-black p-2 w-48 font-bold uppercase tracking-wider">STAFF NAME</th>
-                  <th className="border border-black p-1 text-center w-28 font-bold uppercase">
-                    MORNING ASSEMBLY<br />
-                    <span className="font-normal text-[9px]">(10:00 - 10:30)</span>
-                  </th>
-                  <th className="border border-black p-1 text-center w-24 font-bold uppercase">
-                    ROLL CALL<br />
-                    <span className="font-normal text-[9px]">(10:30 - 10:50)</span>
-                  </th>
-                  {[1, 2, 3, 4, 5, 6, 7].map((p) => (
-                    <th key={p} className="border border-black p-1 text-center font-bold uppercase">
-                      PERIOD {p === 1 ? 'I' : p === 2 ? 'II' : p === 3 ? 'III' : p === 4 ? 'IV' : p === 5 ? 'V' : p === 6 ? 'VI' : 'VII'}<br />
+                  <th className="border border-black p-2 w-42 font-bold uppercase tracking-wider">STAFF NAME</th>
+                  {timings.map((t) => (
+                    <th key={t.id} className={`border border-black p-1 text-center font-bold uppercase ${t.id === 'recess' ? 'w-20 bg-neutral-300 print:bg-neutral-300' : 'w-24'}`}>
+                      {t.label}<br />
                       <span className="font-normal text-[9px]">
-                        {p === 1 ? '10:50-11:20' : 
-                         p === 2 ? '11:20-11:50' : 
-                         p === 3 ? '11:50-12:20' : 
-                         p === 4 ? '12:20-12:50' : 
-                         p === 5 ? '12:50-01:20' : 
-                         p === 6 ? '01:20-01:50' : 
-                         '01:50-02:20'}
+                        {isEditing ? (
+                          <input 
+                            value={t.time} 
+                            onChange={(e) => updateTiming(t.id, e.target.value)}
+                            className="w-full text-center bg-white border border-neutral-300 rounded focus:border-neutral-500 focus:outline-none"
+                          />
+                        ) : t.time}
                       </span>
                     </th>
                   ))}
@@ -234,7 +243,7 @@ export default function App() {
                       exit={{ opacity: 0 }}
                       className="h-12 group"
                     >
-                      <td className="border border-black px-2 font-bold relative">
+                      <td className="border border-black px-2 font-bold relative text-xs">
                         {isEditing ? (
                           <div className="flex items-center gap-1">
                             <input
@@ -253,6 +262,7 @@ export default function App() {
                           teacher.name
                         )}
                       </td>
+                      {/* Assembly */}
                       <td className="border border-black p-1 text-center text-[10px] italic bg-gray-50/50">
                         <PeriodCell
                           value={teacher.periods.assembly}
@@ -260,6 +270,7 @@ export default function App() {
                           isEditing={isEditing}
                         />
                       </td>
+                      {/* Roll Call */}
                       <td className="border border-black p-1 text-center text-[10px] italic bg-gray-50/50">
                         <PeriodCell
                           value={teacher.periods.rollCall}
@@ -267,20 +278,72 @@ export default function App() {
                           isEditing={isEditing}
                         />
                       </td>
-                      {(['p1', 'p2', 'p3', 'p4', 'p5', 'p6', 'p7'] as const).map((p) => (
-                        <td key={p} className="border border-black p-1 text-center">
-                          <PeriodCell
-                            value={teacher.periods[p]}
-                            onChange={(val) => updateTeacherPeriod(teacher.id, p, val)}
-                            isEditing={isEditing}
-                          />
-                        </td>
-                      ))}
+                      {/* P1 */}
+                      <td className="border border-black p-1 text-center">
+                        <PeriodCell
+                          value={teacher.periods.p1}
+                          onChange={(val) => updateTeacherPeriod(teacher.id, 'p1', val)}
+                          isEditing={isEditing}
+                        />
+                      </td>
+                      {/* P2 */}
+                      <td className="border border-black p-1 text-center">
+                        <PeriodCell
+                          value={teacher.periods.p2}
+                          onChange={(val) => updateTeacherPeriod(teacher.id, 'p2', val)}
+                          isEditing={isEditing}
+                        />
+                      </td>
+                      {/* P3 */}
+                      <td className="border border-black p-1 text-center">
+                        <PeriodCell
+                          value={teacher.periods.p3}
+                          onChange={(val) => updateTeacherPeriod(teacher.id, 'p3', val)}
+                          isEditing={isEditing}
+                        />
+                      </td>
+                      {/* Recess */}
+                      <td className="border border-black p-1 text-center font-bold text-[10px] bg-neutral-200 print:bg-neutral-200 italic">
+                        RECESS
+                      </td>
+                      {/* P4 */}
+                      <td className="border border-black p-1 text-center">
+                        <PeriodCell
+                          value={teacher.periods.p4}
+                          onChange={(val) => updateTeacherPeriod(teacher.id, 'p4', val)}
+                          isEditing={isEditing}
+                        />
+                      </td>
+                      {/* P5 */}
+                      <td className="border border-black p-1 text-center">
+                        <PeriodCell
+                          value={teacher.periods.p5}
+                          onChange={(val) => updateTeacherPeriod(teacher.id, 'p5', val)}
+                          isEditing={isEditing}
+                        />
+                      </td>
+                      {/* P6 */}
+                      <td className="border border-black p-1 text-center">
+                        <PeriodCell
+                          value={teacher.periods.p6}
+                          onChange={(val) => updateTeacherPeriod(teacher.id, 'p6', val)}
+                          isEditing={isEditing}
+                        />
+                      </td>
+                      {/* P7 */}
+                      <td className="border border-black p-1 text-center">
+                        <PeriodCell
+                          value={teacher.periods.p7}
+                          onChange={(val) => updateTeacherPeriod(teacher.id, 'p7', val)}
+                          isEditing={isEditing}
+                        />
+                      </td>
                     </motion.tr>
                   ))}
                 </AnimatePresence>
                 {Array.from({ length: Math.max(0, 8 - teachers.length) }).map((_, i) => (
                   <tr key={`empty-${i}`} className="h-12">
+                    <td className="border border-black"></td>
                     <td className="border border-black"></td>
                     <td className="border border-black"></td>
                     <td className="border border-black"></td>
@@ -303,20 +366,24 @@ export default function App() {
               <div className="w-48 border-t border-black mb-2 mx-auto"></div>
               <p className="font-bold text-sm uppercase">I/C Timetable</p>
             </div>
-            <div className="text-center italic text-[10px] mb-4 opacity-75 max-w-sm hidden print:block">
+            <div className="text-center italic text-[9px] mb-4 opacity-75 max-w-sm hidden print:block">
               <p>Note: Staff members are requested to strictly adhere to the timings.</p>
-              <p>Short breaks are adjusted between 3rd and 4th periods.</p>
+              <p>Short breaks are adjusted as per requirements.</p>
             </div>
             {!isEditing && (
-              <div className="text-center italic text-[10px] mb-4 opacity-75 max-w-sm print:hidden">
+              <div className="text-center italic text-[9px] mb-4 opacity-75 max-w-sm print:hidden">
                 <p>Note: Staff members are requested to strictly adhere to the timings.</p>
-                <p>Short breaks are adjusted between 3rd and 4th periods.</p>
+                <p>Short breaks are adjusted as per requirements.</p>
               </div>
             )}
             <div className="text-center">
               <div className="w-56 border-t border-black mb-2 mx-auto"></div>
               <p className="font-bold text-sm uppercase">Headmaster Signature & Seal</p>
             </div>
+          </div>
+          
+          <div className="mt-auto pt-6 text-center text-[9px] text-neutral-400 font-sans italic opacity-60 tracking-wider">
+            Generated from Timetable app by Imran Gani Mugloo
           </div>
         </div>
       </div>
