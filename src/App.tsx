@@ -128,7 +128,34 @@ export default function App() {
 
   const addPeriod = (atIndex: number) => {
     const newId = `p-${Math.random().toString(36).substr(2, 5)}`;
-    const newTiming = { id: newId, label: 'New Period', time: '00:00 - 00:00' };
+    
+    // Auto-calculate label
+    const periodPattern = /^Period\s+(.+)$/i;
+    const existingPeriods = timings.filter(t => periodPattern.test(t.label));
+    
+    // Simple roman numeral or numeric detection
+    const romanNumerals = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII'];
+    let nextLabel = 'New Period';
+    
+    if (existingPeriods.length > 0) {
+      const lastLabel = existingPeriods[existingPeriods.length - 1].label;
+      const match = lastLabel.match(periodPattern);
+      if (match) {
+        const val = match[1].trim();
+        const romanIdx = romanNumerals.indexOf(val.toUpperCase());
+        if (romanIdx !== -1 && romanIdx < romanNumerals.length - 1) {
+          nextLabel = `Period ${romanNumerals[romanIdx + 1]}`;
+        } else if (!isNaN(parseInt(val))) {
+          nextLabel = `Period ${parseInt(val) + 1}`;
+        } else {
+          nextLabel = `Period ${existingPeriods.length + 1}`;
+        }
+      }
+    } else {
+      nextLabel = 'Period I';
+    }
+
+    const newTiming = { id: newId, label: nextLabel, time: '00:00 - 00:00' };
     
     // Insert into timings
     const newTimings = [...timings];
@@ -202,9 +229,9 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-neutral-50 p-4 md:p-8 font-serif text-black">
+    <div className="min-h-screen bg-neutral-100 p-0 md:p-8 font-serif text-black overflow-auto">
       {/* Configuration UI (Hidden during print) */}
-      <div className="mb-8 no-print max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-6 rounded-lg shadow-sm border border-neutral-200 font-sans">
+      <div className="mb-4 no-print max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-4 rounded-lg shadow-sm border border-neutral-200 font-sans mt-4 mx-4 md:mx-auto">
         <div>
           <h1 className="text-2xl font-bold text-neutral-900 mb-1">Academic Timetable Pro</h1>
           <p className="text-sm text-neutral-500">Configure high-resolution academic session schedules optimized for A4 landscape.</p>
@@ -235,15 +262,16 @@ export default function App() {
         </div>
       </div>
 
-      {/* The Printable Timetable */}
-      <div 
-        id="timetable-document"
-        className="print-container bg-white mx-auto shadow-2xl print:shadow-none p-10 print:p-0 transition-all duration-300 overflow-x-auto print:overflow-visible"
-        style={{ width: '297mm', minHeight: '210mm' }}
-      >
-        <div className="w-full h-full border border-black p-6 flex flex-col">
-          {/* Header */}
-          <header className="text-center mb-6">
+      {/* The Printable Timetable Container with Scroll fix */}
+      <div className="w-full overflow-auto pb-8 print:overflow-visible print:pb-0">
+        <div 
+          id="timetable-document"
+          className="print-container bg-white mx-auto shadow-2xl print:shadow-none p-10 print:p-0 transition-all duration-300 print:overflow-visible"
+          style={{ width: '297mm', minHeight: '210mm', maxHeight: '210mm' }}
+        >
+          <div className="w-full h-full border border-black p-4 flex flex-col overflow-hidden">
+            {/* Header */}
+            <header className="text-center mb-4">
             <h1 className="text-3xl font-bold uppercase tracking-wider mb-1 text-black">
               {isEditing ? (
                 <input
@@ -283,12 +311,12 @@ export default function App() {
 
           {/* Grid Layout */}
           <main className="flex-grow overflow-hidden">
-            <table className="w-full border-collapse border border-black text-[11px] table-fixed">
+            <table className="w-full border-collapse border border-black text-[10px] table-fixed">
               <thead className="bg-gray-200 print:bg-gray-200">
                 <tr>
-                  <th className="border border-black p-2 w-42 font-bold uppercase tracking-wider">STAFF NAME</th>
+                  <th className="border border-black p-1 w-40 font-bold uppercase tracking-wider text-[11px]">STAFF NAME</th>
                   {timings.map((t, idx) => (
-                    <th key={t.id} className={`border border-black p-1 text-center font-bold uppercase relative group/header ${t.id === 'recess' ? 'w-20 bg-neutral-300 print:bg-neutral-300' : 'w-24'}`}>
+                    <th key={t.id} className={`border border-black p-1 text-center font-bold uppercase relative group/header ${t.id === 'recess' ? 'w-16 bg-neutral-300 print:bg-neutral-300' : 'w-24'}`}>
                       {isEditing && !t.isSystem ? (
                         <input 
                           value={t.label}
@@ -352,7 +380,7 @@ export default function App() {
                       exit={{ opacity: 0 }}
                       className="h-12 group"
                     >
-                      <td className="border border-black px-2 font-bold relative text-xs">
+                      <td className="border border-black px-2 font-bold relative text-[11px]">
                         {isEditing ? (
                           <div className="flex items-center gap-1">
                             <input
@@ -411,28 +439,28 @@ export default function App() {
           </main>
 
           {/* Footer */}
-          <div className="mt-12 flex justify-between items-end px-4">
+          <div className="mt-4 flex justify-between items-end px-4">
             <div className="text-center">
-              <div className="w-48 border-t border-black mb-2 mx-auto"></div>
-              <p className="font-bold text-sm uppercase">I/C Timetable</p>
+              <div className="w-40 border-t border-black mb-1 mx-auto"></div>
+              <p className="font-bold text-[11px] uppercase">I/C Timetable</p>
             </div>
-            <div className="text-center italic text-[9px] mb-4 opacity-75 max-w-sm hidden print:block">
+            <div className="text-center italic text-[8px] mb-2 opacity-75 max-w-sm hidden print:block">
               <p>Note: Staff members are requested to strictly adhere to the timings.</p>
               <p>Short breaks are adjusted as per requirements.</p>
             </div>
             {!isEditing && (
-              <div className="text-center italic text-[9px] mb-4 opacity-75 max-w-sm print:hidden">
+              <div className="text-center italic text-[8px] mb-2 opacity-75 max-w-sm print:hidden">
                 <p>Note: Staff members are requested to strictly adhere to the timings.</p>
                 <p>Short breaks are adjusted as per requirements.</p>
               </div>
             )}
             <div className="text-center">
-              <div className="w-56 border-t border-black mb-2 mx-auto"></div>
-              <p className="font-bold text-sm uppercase">Headmaster Signature & Seal</p>
+              <div className="w-48 border-t border-black mb-1 mx-auto"></div>
+              <p className="font-bold text-[11px] uppercase">Headmaster Signature & Seal</p>
             </div>
           </div>
           
-          <div className="mt-auto pt-6 text-center text-[9px] text-neutral-400 font-sans italic opacity-60 tracking-wider">
+          <div className="mt-auto pt-2 text-center text-[8px] text-neutral-400 font-sans italic opacity-60 tracking-wider">
             Generated from Timetable app by Imran Gani Mugloo
           </div>
         </div>
@@ -442,23 +470,32 @@ export default function App() {
         @media print {
           @page {
             size: A4 landscape;
-            margin: 0.5cm;
+            margin: 0;
           }
           body {
             background: white !important;
             padding: 0 !important;
             margin: 0 !important;
+            width: 297mm;
+            height: 210mm;
           }
           .min-h-screen {
             min-height: 0 !important;
+            height: 210mm !important;
+            overflow: hidden !important;
           }
           .print-container {
-            width: 100% !important;
-            height: auto !important;
+            width: 297mm !important;
+            height: 210mm !important;
+            min-height: 210mm !important;
+            max-height: 210mm !important;
             box-shadow: none !important;
             padding: 0 !important;
             margin: 0 !important;
-            transform: scale(1) !important;
+            border: none !important;
+          }
+          table {
+            page-break-inside: avoid;
           }
           .no-print {
             display: none !important;
@@ -491,6 +528,7 @@ export default function App() {
           background: #555;
         }
       `}</style>
+      </div>
     </div>
   );
 }
