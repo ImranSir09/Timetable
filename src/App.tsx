@@ -78,7 +78,60 @@ export default function App() {
   ]);
 
   const updateTiming = (id: string, newTime: string) => {
-    setTimings(timings.map(t => t.id === id ? { ...t, time: newTime } : t));
+    const index = timings.findIndex((t) => t.id === id);
+    if (index === -1) return;
+
+    const newTimings = [...timings];
+    newTimings[index].time = newTime;
+
+    const timeToMinutes = (timeStr: string) => {
+      const match = timeStr.match(/(\d{1,2}):(\d{2})/);
+      if (!match) return null;
+      let h = parseInt(match[1]);
+      const m = parseInt(match[2]);
+      // Heuristic: If hour is 1-7, it's likely PM in a school context (13:00-19:00)
+      if (h >= 1 && h <= 7) h += 12;
+      return h * 60 + m;
+    };
+
+    const minutesToTime = (mins: number) => {
+      const h = Math.floor(mins / 60) % 24;
+      const m = mins % 60;
+      const displayH = h > 12 ? h - 12 : (h === 0 ? 12 : h);
+      return `${displayH.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
+    };
+
+    // Cascade to subsequent periods
+    for (let i = index; i < newTimings.length - 1; i++) {
+      const current = newTimings[i].time;
+      const next = newTimings[i + 1].time;
+
+      const currentParts = current.split('-').map((s) => s.trim());
+      if (currentParts.length < 2) break;
+
+      const currentEndMins = timeToMinutes(currentParts[1]);
+      if (currentEndMins === null) break;
+
+      const nextParts = next.split('-').map((s) => s.trim());
+      if (nextParts.length < 2) {
+        newTimings[i + 1].time = `${minutesToTime(currentEndMins)} - `;
+        break;
+      }
+
+      const nextStartMins = timeToMinutes(nextParts[0]);
+      const nextEndMins = timeToMinutes(nextParts[1]);
+
+      if (nextStartMins !== null && nextEndMins !== null) {
+        const duration = nextEndMins - nextStartMins;
+        const newNextStart = currentEndMins;
+        const newNextEnd = newNextStart + duration;
+        newTimings[i + 1].time = `${minutesToTime(newNextStart)} - ${minutesToTime(newNextEnd)}`;
+      } else {
+        newTimings[i + 1].time = `${minutesToTime(currentEndMins)} - ${nextParts[1]}`;
+      }
+    }
+
+    setTimings(newTimings);
   };
 
   const [isEditing, setIsEditing] = useState(false);
