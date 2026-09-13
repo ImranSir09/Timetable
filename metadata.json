@@ -2,5 +2,7 @@
   "name": "Academic Timetable Pro",
   "description": "Professional high-resolution academic timetable for govt. schools, optimized for A4 landscape printing.",
   "requestFramePermissions": [],
-  "majorCapabilities": []
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
 }
