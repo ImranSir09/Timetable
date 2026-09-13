@@ -1,4 +1,4 @@
-import { CalendarDays, Users, Clock, Building2, Printer } from 'lucide-react';
+import { CalendarDays, Users, Clock, Building2, FileDown } from 'lucide-react';
 
 export type AppTab = 'schedule' | 'teachers' | 'timings' | 'school' | 'export';
 
@@ -41,10 +41,10 @@ export default function TabNavigation({
     },
     {
       id: 'export' as AppTab,
-      label: 'A4 Export',
-      icon: Printer,
-      badge: 'A4',
-      badgeColor: 'bg-amber-400 text-black',
+      label: 'PDF & Excel',
+      icon: FileDown,
+      badge: 'Export',
+      badgeColor: 'bg-black text-white',
     },
   ];
 

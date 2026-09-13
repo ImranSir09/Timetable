@@ -151,6 +151,24 @@ export default function App() {
     );
   };
 
+  const handleApplyTimings = (newTimings: PeriodTiming[]) => {
+    setTimings(newTimings);
+    // Ensure all period IDs exist in teachers' periods
+    setTeachers((prevTeachers) =>
+      prevTeachers.map((t) => {
+        const updatedPeriods = { ...t.periods };
+        newTimings.forEach((timing) => {
+          if (updatedPeriods[timing.id] === undefined) {
+            if (timing.id === 'assembly') updatedPeriods[timing.id] = 'Assembly';
+            else if (timing.id === 'rollCall') updatedPeriods[timing.id] = 'Roll Call';
+            else updatedPeriods[timing.id] = 'Free';
+          }
+        });
+        return { ...t, periods: updatedPeriods };
+      })
+    );
+  };
+
   // Teacher actions
   const handleAddTeacher = (name?: string, designation?: string) => {
     const newId = `t-${Math.random().toString(36).substring(2, 8)}`;
@@ -260,6 +278,7 @@ export default function App() {
             onUpdateLabel={handleUpdateTimingLabel}
             onAddPeriod={handleAddPeriod}
             onRemovePeriod={handleRemovePeriod}
+            onApplyTimings={handleApplyTimings}
           />
         )}
 
@@ -275,6 +294,7 @@ export default function App() {
             profile={profile}
             timings={timings}
             teachers={teachers}
+            conflicts={conflicts}
           />
         )}
       </main>
@@ -304,6 +324,7 @@ export default function App() {
           profile={profile}
           timings={timings}
           teachers={teachers}
+          conflicts={conflicts}
         />
       </div>
     </div>

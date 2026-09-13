@@ -61,13 +61,13 @@ export default function MobileHeader({
             )}
           </div>
 
-          {/* Quick Print action */}
+          {/* Quick Export action */}
           <button
             onClick={onOpenPrint}
             id="header-btn-print"
-            aria-label="Export A4 Landscape"
+            aria-label="Export PDF & Excel"
             className="p-2 rounded-lg bg-amber-400 text-black hover:bg-amber-300 font-bold transition-transform active:scale-95 shadow-sm"
-            title="A4 Landscape Print / PDF"
+            title="Export PDF & Excel"
           >
             <Printer className="w-4 h-4" />
           </button>

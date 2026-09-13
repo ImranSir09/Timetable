@@ -37,3 +37,27 @@ export interface ScheduleConflict {
   subject1: string;
   subject2: string;
 }
+
+export type SubjectCategory =
+  | 'core'
+  | 'lab'
+  | 'sports'
+  | 'arts'
+  | 'advisory'
+  | 'free'
+  | 'other';
+
+export interface SubjectCategoryInfo {
+  id: SubjectCategory;
+  name: string;
+  shortName: string;
+  badgeBg: string;
+  badgeText: string;
+  badgeBorder: string;
+  borderAccent: string;
+  bgLight: string;
+  dotBg: string;
+  iconName: string;
+  description: string;
+}
+

@@ -19,6 +19,7 @@ import {
   parsePeriodValue,
   isClassOccupiedInPeriod,
   isSubjectAssignedToOtherTeacher,
+  classifySubject,
 } from '../utils/timetableLogic';
 
 interface SlotAssignModalProps {
@@ -208,7 +209,7 @@ export default function SlotAssignModal({
                           key={sub}
                           disabled={busy.isOccupied}
                           onClick={() => handleSelectRemembered(sub)}
-                          className={`p-2.5 rounded-xl border text-left flex flex-col justify-between transition-all relative ${
+                          className={`p-2.5 rounded-xl border text-left flex flex-col justify-between transition-all relative border-l-4 ${classifySubject(sub).borderAccent} ${
                             busy.isOccupied
                               ? 'bg-red-50/70 border-red-200 opacity-60 cursor-not-allowed'
                               : 'bg-white border-neutral-200 hover:border-black hover:shadow-xs active:bg-neutral-50'
@@ -216,9 +217,13 @@ export default function SlotAssignModal({
                         >
                           <div className="flex items-center justify-between w-full">
                             <span className="text-xs font-bold text-neutral-900">{parsed.className || 'General'}</span>
-                            {busy.isOccupied && (
+                            {busy.isOccupied ? (
                               <span className="text-[10px] text-red-700 bg-red-100 font-semibold px-1 rounded flex items-center gap-0.5">
                                 <Ban className="w-2.5 h-2.5" /> Clash
+                              </span>
+                            ) : (
+                              <span className={`text-[9px] font-bold px-1.5 py-0.2 rounded ${classifySubject(sub).badgeBg} ${classifySubject(sub).badgeText}`}>
+                                {classifySubject(sub).shortName}
                               </span>
                             )}
                           </div>
@@ -376,7 +381,14 @@ export default function SlotAssignModal({
                 {/* Preview pill */}
                 <div className="bg-neutral-100 p-3 rounded-xl flex items-center justify-between">
                   <div className="text-xs text-neutral-600">
-                    Assignment Preview:
+                    <div className="flex items-center gap-1.5">
+                      <span>Assignment Preview:</span>
+                      {candidateFormatted && (
+                        <span className={`text-[10px] font-bold px-1.5 py-0.2 rounded ${classifySubject(candidateFormatted).badgeBg} ${classifySubject(candidateFormatted).badgeText}`}>
+                          {classifySubject(candidateFormatted).name}
+                        </span>
+                      )}
+                    </div>
                     <div className="text-sm font-bold text-black mt-0.5">
                       {candidateFormatted || 'None'}
                     </div>

@@ -14,16 +14,16 @@ export const DEFAULT_SCHOOL_PROFILE: SchoolProfile = {
 };
 
 export const DEFAULT_TIMINGS: PeriodTiming[] = [
-  { id: 'assembly', label: 'Morning Assembly', time: '10:00 - 10:30', isSystem: true },
-  { id: 'rollCall', label: 'Roll Call', time: '10:30 - 10:50', isSystem: true },
-  { id: 'p1', label: 'Period I', time: '10:50 - 11:20' },
-  { id: 'p2', label: 'Period II', time: '11:20 - 11:50' },
-  { id: 'p3', label: 'Period III', time: '11:50 - 12:20' },
-  { id: 'recess', label: 'Recess Period', time: '12:30 - 02:00', isSystem: true },
-  { id: 'p4', label: 'Period IV', time: '02:00 - 02:30' },
-  { id: 'p5', label: 'Period V', time: '02:30 - 03:00' },
-  { id: 'p6', label: 'Period VI', time: '03:00 - 03:30' },
-  { id: 'p7', label: 'Period VII', time: '03:30 - 04:00' },
+  { id: 'assembly', label: 'Morning Assembly', time: '10:00 - 10:20', isSystem: true },
+  { id: 'rollCall', label: 'Roll Call', time: '10:20 - 10:30', isSystem: true },
+  { id: 'p1', label: 'Period I', time: '10:30 - 11:10' },
+  { id: 'p2', label: 'Period II', time: '11:10 - 11:50' },
+  { id: 'p3', label: 'Period III', time: '11:50 - 12:30' },
+  { id: 'recess', label: 'Recess Period', time: '12:30 - 01:10', isSystem: true },
+  { id: 'p4', label: 'Period IV', time: '01:10 - 01:50' },
+  { id: 'p5', label: 'Period V', time: '01:50 - 02:30' },
+  { id: 'p6', label: 'Period VI', time: '02:30 - 03:10' },
+  { id: 'p7', label: 'Period VII', time: '03:10 - 03:50' },
 ];
 
 export const DEFAULT_TEACHERS: TeacherSchedule[] = [
